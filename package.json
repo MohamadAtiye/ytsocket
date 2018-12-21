@@ -1,9 +1,13 @@
 {
     "name": "my_world_app",
     "version": "0.0.1",
-    "description": "my_world_app one",
+    "description": "shared youtube",
     "dependencies": {
         "express": "^4.15.2",
         "socket.io": "^2.1.1"
+    },  
+    "main": "index.html",
+    "scripts": {
+        "start": "node socketserver.js"
     }
 }
