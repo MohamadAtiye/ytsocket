@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>MidoKing's YouTube</title>
+    <meta
+      name="viewport"
+      content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0"
+    />
+    <style></style>
+    <script src="js/libs/socket.io.js"></script>
+    <script src="js/videoControl.js"></script>
+    <script src="js/socketHandler.js"></script>
+    <script src="js/socialHandler.js"></script>
+  </head>
+
+
+  <style>
+      @media screen and (min-width: 1300px) {
+        div.example {
+          display: none;
+        }
+    
+        #videoPlayerArea{
+          flex:1;
+          min-width: 600px;
+          padding: 10px;
+          border-top: 2px solid black;
+        }
+        #userSocialArea{
+          flex:1;
+          min-width: 600px;
+          padding: 10px;
+          border-top: 2px solid black;
+          border-left: 2px solid black;
+        }
+        #appHolder{
+        /* width:100%; */
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        max-width: 1350px;
+        margin: 0 auto
+      }
+      }
+  @media screen and (max-width: 1299px) {
+    div.example {
+      display: none;
+    }
+
+    #videoPlayerArea{
+      flex:1;
+      width: 100%;
+      /* padding: 10px; */
+      border-top: 2px solid black;
+      float: left;
+    }
+    #userSocialArea{
+      flex:1;
+      width: 100%;
+      /* padding: 10px; */
+      border-top: 2px solid black;
+      float: left;
+    }
+    #appHolder{
+      width:100%;
+      margin: 0 auto
+    }
+  }
+</style>
+
+
+  <body>
+
+
+    <div style="height:100px;width: 100%;text-align: center;border-bottom: 2px solid black;">
+      <h1>Shared YouTube watching experience</h1>
+    </div>
+    
+
+
+
+    <div
+      id="appHolder"
+    >
+
+
+    <!-- #################################  START VIDEO PLAYER AREA  ##################################### -->
+      <div id="videoPlayerArea">
+        <!-- 1. The <iframe> (and video player) will replace this <div> tag. -->
+        <div id="player"></div>
+
+        <!-- <br />
+    <button onclick="videoClass.playVideo()">Play</button>
+    <button onclick="videoClass.pauseVideo()">Pause</button> -->
+
+        <br />
+
+        Load video ( url / id ) <input id="videoIDBox" type="text" />
+        <button onclick="videoClass.loadVideo()">Load</button> <br />
+        <img id="thumber" /> <br />
+
+        Search for video <input id="searchBox" type="text" />
+        <button onclick="videoClass.searchVideo()">Search</button>
+        <button onclick="videoClass.searchVideo(-1)">clear</button>
+
+        <div id="searchArea" style="width:640px"></div>
+
+        <br />
+      </div>
+    <!-- #################################  END VIDEO PLAYER AREA  ##################################### -->
+
+
+    
+    <!-- #################################  START SOCIAL AREA  ##################################### -->
+      <div id="userSocialArea" >
+        <table style="width:100%">
+          <!-- ////////////////////////////////////////////////////// -->
+          <tr id="tr_name_1">
+            <td>Choose a name</td>
+            <td><input type="text" id="chosenNameBox" /></td>
+            <td>
+              <button style="width:100%" onclick="socialClass.setName()">
+                Set Name
+              </button>
+            </td>
+          </tr>
+
+          <tr id="tr_name_2">
+            <td colspan="3">
+              <div><label id="error_name" style="color:red"></label></div>
+            </td>
+          </tr>
+
+          <!-- ////////////////////////////////////////////////////// -->
+          <tr id="tr_room_1">
+            <td colspan="3">
+              <div id="publicRoomsList">
+                <hr />
+                {this should be a list of available public room to choose from}
+                <div id="publicRoomsList"></div>
+                <hr>
+              </div>
+            </td>
+          </tr>
+
+          <tr id="tr_room_2">
+          </tr>
+
+          <tr id="tr_room_3">
+          </tr>
+
+          <!-- ////////////////////////////////////////////////////// -->
+          
+          <tr id="tr_log_1">
+          </tr>
+          <tr id="tr_log_2">
+            <!-- <td colspan="3">
+              <div
+                id="eventLog"
+                style="width:100%;max-height: 500px;overflow-y: scroll;"
+              ></div>
+            </td> -->
+          </tr>
+        </table>
+
+      </div>
+    <!-- #################################  END SOCIAL AREA  ##################################### -->
+
+    </div>
+  </body>
+</html>
