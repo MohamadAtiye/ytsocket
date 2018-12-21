@@ -97,6 +97,10 @@ io.on("connection", function(socket) {
     .emit("roomChat", msg);
   });
 
+  socket.on("ping", function(msg, callback) {
+    callback(msg);
+  });
+
 ////////////////////////////////////////////////////////////////////////////////////////
   socket.on("disconnect", function() {
     let name = "";
