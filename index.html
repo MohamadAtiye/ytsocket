@@ -1,22 +1,20 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="utf-8" />
-    <title>MidoKing's YouTube</title>
-    <meta
-      name="viewport"
-      content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0"
-    />
-    <style></style>
-    <script src="js/libs/socket.io.js"></script>
-    <script src="js/videoControl.js"></script>
-    <script src="js/socketHandler.js"></script>
-    <script src="js/socialHandler.js"></script>
-  </head>
+
+<head>
+  <meta charset="utf-8" />
+  <title>MidoKing's YouTube</title>
+  <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
+  <style></style>
+  <script src="js/libs/socket.io.js"></script>
+  <script src="js/videoControl.js"></script>
+  <script src="js/socketHandler.js"></script>
+  <script src="js/socialHandler.js"></script>
+</head>
 
 
-  <style>
-      @media screen and (min-width: 1300px) {
+<style>
+  @media screen and (min-width: 1300px) {
         div.example {
           display: none;
         }
@@ -70,103 +68,180 @@
 </style>
 
 
-  <body>
+<body>
 
 
-    <div style="height:100px;width: 100%;text-align: center;border-bottom: 2px solid black;">
-      <h1>Shared YouTube watching experience</h1>
-    </div>
-    
+  <div style="height:100px;width: 100%;text-align: center;border-bottom: 2px solid black;">
+    <h1>Shared YouTube watching experience</h1>
+  </div>
 
 
 
-    <div
-      id="appHolder"
-    >
+
+  <div id="appHolder">
 
 
     <!-- #################################  START VIDEO PLAYER AREA  ##################################### -->
-      <div id="videoPlayerArea">
-        <!-- 1. The <iframe> (and video player) will replace this <div> tag. -->
-        <div id="player"></div>
+    <div id="videoPlayerArea">
+      <!-- 1. The <iframe> (and video player) will replace this <div> tag. -->
+      <div id="player"></div>
 
-        <!-- <br />
-    <button onclick="videoClass.playVideo()">Play</button>
-    <button onclick="videoClass.pauseVideo()">Pause</button> -->
+      <br />
 
-        <br />
 
-        Load video ( url / id ) <input id="videoIDBox" type="text" />
-        <button onclick="videoClass.loadVideo()">Load</button> <br />
-        <img id="thumber" /> <br />
+      <style>
+        /* The Modal (background) */
+        .modal {
+          display: none; /* Hidden by default */
+          position: fixed; /* Stay in place */
+          z-index: 1; /* Sit on top */
+          padding-top: 100px; /* Location of the box */
+          left: 0;
+          top: 0;
+          width: 100%; /* Full width */
+          height: 100%; /* Full height */
+          overflow: auto; /* Enable scroll if needed */
+          background-color: rgb(0,0,0); /* Fallback color */
+          background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+        }
+        
+        /* Modal Content */
+        .modal-content {
+          background-color: #fefefe;
+          margin: auto;
+          padding: 20px;
+          border: 1px solid #888;
+          width: 80%;
+        }
+        
+        /* The Close Button */
+        .close {
+          color: #aaaaaa;
+          float: right;
+          font-size: 28px;
+          font-weight: bold;
+        }
+        
+        .close:hover,
+        .close:focus {
+          color: #000;
+          text-decoration: none;
+          cursor: pointer;
+        }
+        </style>
 
-        Search for video <input id="searchBox" type="text" />
-        <button onclick="videoClass.searchVideo()">Search</button>
-        <button onclick="videoClass.searchVideo(-1)">clear</button>
 
-        <div id="searchArea" style="width:640px"></div>
+      <!-- Trigger/Open The Modal -->
+      <button id="myBtn">change video</button>
 
-        <br />
+      <!-- The Modal -->
+      <div id="myModal" class="modal">
+
+        <!-- Modal content -->
+        <div class="modal-content">
+          <span class="close">&times;</span>
+          Load video ( url / id ) <input id="videoIDBox" type="text" />
+          <button onclick="videoClass.loadVideo()">Load</button> <br />
+          <img id="thumber" /> <br />
+
+          Search for video <input id="searchBox" type="text" />
+          <button onclick="videoClass.searchVideo()">Search</button>
+          <button onclick="videoClass.searchVideo(-1)">clear</button>
+
+          <div id="searchArea" style="width:640px"></div>
+        </div>
+        <script>
+          // Get the modal
+          var modal = document.getElementById('myModal');
+
+          // Get the button that opens the modal
+          var btn = document.getElementById("myBtn");
+
+          // Get the <span> element that closes the modal
+          var span = document.getElementsByClassName("close")[0];
+
+          // When the user clicks the button, open the modal 
+          btn.onclick = function () {
+            modal.style.display = "block";
+          }
+
+          // When the user clicks on <span> (x), close the modal
+          span.onclick = function () {
+            modal.style.display = "none";
+          }
+
+          // When the user clicks anywhere outside of the modal, close it
+          window.onclick = function (event) {
+            if (event.target == modal) { 
+              modal.style.display = "none";
+            }
+          }
+        </script>
       </div>
+
+
+      <br />
+    </div>
     <!-- #################################  END VIDEO PLAYER AREA  ##################################### -->
 
 
-    
+
     <!-- #################################  START SOCIAL AREA  ##################################### -->
-      <div id="userSocialArea" >
-        <table style="width:100%">
-          <!-- ////////////////////////////////////////////////////// -->
-          <tr id="tr_name_1">
-            <td>Choose a name</td>
-            <td><input type="text" id="chosenNameBox" /></td>
-            <td>
-              <button style="width:100%" onclick="socialClass.setName()">
-                Set Name
-              </button>
-            </td>
-          </tr>
+    <div id="userSocialArea">
+      <table style="width:100%">
+        <!-- ////////////////////////////////////////////////////// -->
+        <tr id="tr_name_1">
+          <td>Choose a name</td>
+          <td><input type="text" id="chosenNameBox" /></td>
+          <td>
+            <button style="width:100%" onclick="socialClass.setName()">
+              Set Name
+            </button>
+          </td>
+        </tr>
 
-          <tr id="tr_name_2">
-            <td colspan="3">
-              <div><label id="error_name" style="color:red"></label></div>
-            </td>
-          </tr>
+        <tr id="tr_name_2">
+          <td colspan="3">
+            <div><label id="error_name" style="color:red"></label></div>
+          </td>
+        </tr>
 
-          <!-- ////////////////////////////////////////////////////// -->
-          <tr id="tr_room_1">
-            <td colspan="3">
-              <div id="publicRoomsList">
-                <hr />
-                {this should be a list of available public room to choose from}
-                <div id="publicRoomsList"></div>
-                <hr>
-              </div>
-            </td>
-          </tr>
+        <!-- ////////////////////////////////////////////////////// -->
+        <tr id="tr_room_1">
+          <td colspan="3">
+            <div id="publicRoomsList">
+              <hr />
+              {this should be a list of available public room to choose from}
+              <div id="publicRoomsList"></div>
+              <hr>
+            </div>
+          </td>
+        </tr>
 
-          <tr id="tr_room_2">
-          </tr>
+        <tr id="tr_room_2">
+        </tr>
 
-          <tr id="tr_room_3">
-          </tr>
+        <tr id="tr_room_3">
+        </tr>
 
-          <!-- ////////////////////////////////////////////////////// -->
-          
-          <tr id="tr_log_1">
-          </tr>
-          <tr id="tr_log_2">
-            <!-- <td colspan="3">
+        <!-- ////////////////////////////////////////////////////// -->
+
+        <tr id="tr_log_1">
+        </tr>
+        <tr id="tr_log_2">
+          <!-- <td colspan="3">
               <div
                 id="eventLog"
                 style="width:100%;max-height: 500px;overflow-y: scroll;"
               ></div>
             </td> -->
-          </tr>
-        </table>
-
-      </div>
-    <!-- #################################  END SOCIAL AREA  ##################################### -->
+        </tr>
+      </table>
 
     </div>
-  </body>
+    <!-- #################################  END SOCIAL AREA  ##################################### -->
+
+  </div>
+</body>
+
 </html>
