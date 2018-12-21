@@ -1,12 +1,28 @@
-const app = require("express")();
-const server = require("http").createServer(app);
-const io = require("socket.io")(server);
+'use strict';
 
-const SOCKET_PORT = 8081;
+const express = require("express");
+const socketIO = require('socket.io');
+const path = require('path');
 
-server.listen(SOCKET_PORT, () => {
-  console.log("SOCKET.IO now listening at port ", SOCKET_PORT);
-});
+// const server = require("http").createServer(express);
+// const io = require("socket.io")(server);
+
+// const SOCKET_PORT = 8081;
+const SOCKET_PORT = process.env.PORT || 3000;
+const INDEX = path.join(__dirname, 'index.html');
+
+
+const server = express()
+  .get('/', (req, res) => res.sendFile(INDEX))
+  .listen(SOCKET_PORT, () => console.log(`Listening on ${SOCKET_PORT}`));
+
+
+//create socket server
+const io = socketIO(server);
+
+// server.listen(SOCKET_PORT, () => {
+//   console.log("SOCKET.IO now listening at port ", SOCKET_PORT);
+// });
 
 // io.emit //==> to everyone including sender
 // socket.broadcast.emit //==> to everyone except sender
@@ -16,7 +32,7 @@ server.listen(SOCKET_PORT, () => {
 let connectedPlayerSockets = [];
 let connectedPlayerNames = [];
 
-io.on("connection", function(socket) {
+io.on("connection", function (socket) {
   console.log(socket.id, " connected");
   connectedPlayerSockets[socket.id] = socket;
 
@@ -32,18 +48,18 @@ io.on("connection", function(socket) {
   //   io.to(roomName).emit("saySomething", socket.id + " has left the room");
   // });
 
-  socket.on("saySomething", function(msg, callback) {
+  socket.on("saySomething", function (msg, callback) {
     console.log(socket.id, " said : " + JSON.stringify(msg));
     callback("you said : " + JSON.stringify(msg));
   });
 
-  socket.on("playerControl", function(msg, callback) {
+  socket.on("playerControl", function (msg, callback) {
     console.log(socket.id, " said : " + JSON.stringify(msg));
     socket.broadcast.emit("playerControl", msg);
   });
 
-////////////////////////////////////////////////////////////////////////////////////////
-  socket.on("setPlayerName", function(msg, callback) {
+  ////////////////////////////////////////////////////////////////////////////////////////
+  socket.on("setPlayerName", function (msg, callback) {
     let newName = msg.name.trim();
     if (connectedPlayerNames.includes(newName)) {
       callback({ ok: false, error: "**name already in use" });
@@ -62,10 +78,10 @@ io.on("connection", function(socket) {
     }
   });
 
-////////////////////////////////////////////////////////////////////////////////////////
-  socket.on("joinRoom", function(msg, callback) {
+  ////////////////////////////////////////////////////////////////////////////////////////
+  socket.on("joinRoom", function (msg, callback) {
     let newRoom = msg.room.trim();
-    if(!socket.profile || !socket.profile.name){
+    if (!socket.profile || !socket.profile.name) {
       callback({
         ok: false,
         error: "**choose a name first, then join a room"
@@ -79,34 +95,34 @@ io.on("connection", function(socket) {
     } else {
       socket.join(newRoom, () => {
         socket.profile.room = newRoom;
-        let newMsg = {ts:Date.now(),from:"system",msg:socket.profile.name + " has joined this room",color:"red"};
+        let newMsg = { ts: Date.now(), from: "system", msg: socket.profile.name + " has joined this room", color: "red" };
         socket
           .to(newRoom)
           .emit("roomChat", newMsg);
       });
 
-      callback({ ok: true, error: "", newName: socket.profile.name,newRoom:newRoom, id: socket.id });
+      callback({ ok: true, error: "", newName: socket.profile.name, newRoom: newRoom, id: socket.id });
     }
   });
 
-  socket.on("roomChat", function(msg, callback) {
-    if(!socket.profile || !socket.profile.room) return;
+  socket.on("roomChat", function (msg, callback) {
+    if (!socket.profile || !socket.profile.room) return;
     msg.ts = Date.now();
     socket
-    .to(socket.profile.room)
-    .emit("roomChat", msg);
+      .to(socket.profile.room)
+      .emit("roomChat", msg);
   });
 
-  socket.on("ping", function(msg, callback) {
+  socket.on("ping", function (msg, callback) {
     callback(msg);
   });
 
-////////////////////////////////////////////////////////////////////////////////////////
-  socket.on("disconnect", function() {
+  ////////////////////////////////////////////////////////////////////////////////////////
+  socket.on("disconnect", function () {
     let name = "";
     let room = "";
-    if(socket.profile) {
-      name =socket.profile.name;
+    if (socket.profile) {
+      name = socket.profile.name;
       room = socket.profile.room;
     }
     console.log(socket.id, name, " disconnected ");
@@ -116,15 +132,15 @@ io.on("connection", function(socket) {
     if (index > -1) {
       connectedPlayerNames.splice(index, 1);
     }
-    let newMsg = {ts:Date.now(),from:"system",msg:name + " has left this room",color:"red"};
+    let newMsg = { ts: Date.now(), from: "system", msg: name + " has left this room", color: "red" };
 
     io
-    .to(room)
-    .emit("roomChat", newMsg);
+      .to(room)
+      .emit("roomChat", newMsg);
 
     //-- delete player socket
     delete connectedPlayerSockets[socket.id];
   });
 
-////////////////////////////////////////////////////////////////////////////////////////
+  ////////////////////////////////////////////////////////////////////////////////////////
 });
