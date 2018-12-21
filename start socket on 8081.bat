@@ -1,1 +1,1 @@
-node socketServer.js
+node index.js
