@@ -4,10 +4,7 @@ const express = require("express");
 const socketIO = require('socket.io');
 const path = require('path');
 
-// const server = require("http").createServer(express);
-// const io = require("socket.io")(server);
 
-// const SOCKET_PORT = 8081;
 const SOCKET_PORT = process.env.PORT || 3000;
 const INDEX = path.join(__dirname, 'index.html');
 
@@ -20,20 +17,12 @@ const server = express()
 //create socket server
 const io = socketIO(server);
 
-// server.listen(SOCKET_PORT, () => {
-//   console.log("SOCKET.IO now listening at port ", SOCKET_PORT);
-// });
-
-// io.emit //==> to everyone including sender
-// socket.broadcast.emit //==> to everyone except sender
-// io.to(targetRoom).emit("roommsg", text); //==> send to room
-// io.to(targetSocketID).emit("private", text); //==> send to person (same as room)
 
 let connectedPlayerSockets = [];
 let connectedPlayerNames = [];
 
 io.on("connection", function (socket) {
-  console.log(socket.id, " connected");
+  console.log("###################-- "+socket.id, " connected");
   connectedPlayerSockets[socket.id] = socket;
 
   // //joining a room
@@ -55,7 +44,11 @@ io.on("connection", function (socket) {
 
   socket.on("playerControl", function (msg, callback) {
     console.log(socket.id, " said : " + JSON.stringify(msg));
-    socket.broadcast.emit("playerControl", msg);
+    if (socket.profile && socket.profile.room)
+      socket
+        .to(socket.profile.room)
+        .emit("playerControl", msg);
+
   });
 
   ////////////////////////////////////////////////////////////////////////////////////////
@@ -74,7 +67,9 @@ io.on("connection", function (socket) {
       connectedPlayerSockets[socket.id] = socket;
       connectedPlayerNames.push(newName);
       callback({ ok: true, error: "", newName: newName, id: socket.id });
-      console.log("new player received a name.", socket.id, newName);
+
+      console.log("###################-- new received a name");
+      console.log(socket.id,socket.profile);
     }
   });
 
@@ -102,6 +97,9 @@ io.on("connection", function (socket) {
       });
 
       callback({ ok: true, error: "", newName: socket.profile.name, newRoom: newRoom, id: socket.id });
+
+      console.log("###################-- player joined a room");
+      console.log(socket.id,socket.profile);
     }
   });
 
@@ -111,9 +109,15 @@ io.on("connection", function (socket) {
     socket
       .to(socket.profile.room)
       .emit("roomChat", msg);
+
+    callback(msg);
+
+    console.log("###################-- message to room : "+ socket.profile.room);
+    console.log(msg);
   });
 
   socket.on("ping", function (msg, callback) {
+    console.log("###################-- ping message");
     callback(msg);
   });
 
@@ -125,7 +129,7 @@ io.on("connection", function (socket) {
       name = socket.profile.name;
       room = socket.profile.room;
     }
-    console.log(socket.id, name, " disconnected ");
+    console.log("###################-- "+socket.id, name, " disconnected ");
 
     //-- remove name from used names list
     var index = connectedPlayerNames.indexOf(name);

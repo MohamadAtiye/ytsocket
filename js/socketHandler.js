@@ -1,5 +1,5 @@
-// var socket = io("http://localhost:3000");
-var socket = io("https://ytsocket.herokuapp.com");
+var socket = io("http://localhost:3000");
+// const socket = io("https://ytsocket.herokuapp.com");
 
 document.addEventListener("DOMContentLoaded", () => {
 
@@ -16,13 +16,6 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   socket.on("roomChat", function(msg) {
-    // let eventLog = document.getElementById("eventLog");
-
-    // let newLog = document.createElement("label");
-    // newLog.textContent = msg;
-
-    // eventLog.appendChild(newLog);
-    // eventLog.appendChild(document.createElement("hr"));
     socialClass.msgReceived(msg);
     console.log(msg)
   });
