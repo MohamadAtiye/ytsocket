@@ -1,5 +1,5 @@
-// var socket = io("http://localhost:3000");
-const socket = io("https://ytsocket.herokuapp.com");
+var socket = io("http://localhost:3000");
+// const socket = io("https://ytsocket.herokuapp.com");
 
 document.addEventListener("DOMContentLoaded", () => {
 

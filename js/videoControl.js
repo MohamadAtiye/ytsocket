@@ -1,5 +1,6 @@
 const INIT_VID_ID = "4p_YY0R8Si0";
 
+
 // 2. This code loads the IFrame Player API code asynchronously.
 var tag = document.createElement("script");
 tag.src = "https://www.youtube.com/iframe_api";
@@ -27,6 +28,10 @@ function onYouTubeIframeAPIReady() {
 // 4. The API will call this function when the video player is ready.
 function onPlayerReady(event) {
   event.target.playVideo();
+  try {
+    document.getElementById("nowPlayingTitle").textContent =
+      player.j.videoData.title;
+  } catch (e) {}
 }
 
 // 5. The API calls this function when the player's state changes.
@@ -97,7 +102,7 @@ let videoClass = (function() {
   };
 
   let loadVideo = argID => {
-    console.log("load video",argID);
+    console.log("load video", argID);
     let meta = {};
 
     let id = "";
@@ -112,14 +117,18 @@ let videoClass = (function() {
         id = newURL;
       }
     }
-    let thumber = document.getElementById("thumber");
-    thumber.src = "https://img.youtube.com/vi/" + id + "/mqdefault.jpg";
-    thumber.onload = e => {
+    let nowPlayingThumbnail = document.getElementById("nowPlayingThumbnail");
+    nowPlayingThumbnail.src =
+      "https://img.youtube.com/vi/" + id + "/mqdefault.jpg";
+    nowPlayingThumbnail.onload = e => {
       console.log("loaded", e);
-      if (thumber.width === 120) {
-        alert("Error: Invalid video id ", thumber.src);
+      if (nowPlayingThumbnail.width === 120) {
+        document.getElementById("videoLoadError").textContent =
+          "Video not found";
+        alert("Error: Invalid video id ", thumnowPlayingThumbnailber.src);
       } else {
-        console.log("loading video ", thumber.src);
+        console.log("loading video ", nowPlayingThumbnail.src);
+        document.getElementById("videoLoadError").textContent = "";
         player.pauseVideo();
         player.loadVideoById(id);
         meta.newURL = id;
@@ -131,33 +140,36 @@ let videoClass = (function() {
         });
 
         nowPlaying = newURL;
+
+        try {
+          document.getElementById("nowPlayingTitle").textContent =
+            player.j.videoData.title;
+        } catch (e) {}
       }
-      console.log(thumber.src);
+      console.log(nowPlayingThumbnail.src);
     };
   };
 
   let receiveCMD = msg => {
     if (msg.cmd == "play") {
-      if(nowPlaying!= msg.vid){
+      if (nowPlaying != msg.vid) {
         loadVideo(msg.meta.vid);
         setTimeout(() => {
           player.playVideo();
           player.seekTo(msg.meta);
         }, 1000);
-      }
-      else{
+      } else {
         player.playVideo();
         player.seekTo(msg.meta);
       }
     } else if (msg.cmd == "pause") {
-      if(nowPlaying!= msg.vid){
+      if (nowPlaying != msg.vid) {
         loadVideo(msg.meta.vid);
         setTimeout(() => {
           player.pauseVideo();
           player.seekTo(msg.meta);
         }, 1000);
-      }
-      else{
+      } else {
         player.pauseVideo();
         player.seekTo(msg.meta);
       }
