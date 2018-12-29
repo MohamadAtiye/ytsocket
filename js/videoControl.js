@@ -80,10 +80,15 @@ let videoClass = (function() {
   let nowPlaying = INIT_VID_ID;
 
   let playVideo = () => {
+    let VCMD = {
+      cmd: "play", 
+      vts: player.getCurrentTime(), 
+      vidID: nowPlaying
+    }
     player.playVideo();
     socket.emit(
       "playerControl",
-      { cmd: "play", meta: player.getCurrentTime(), vid: nowPlaying },
+      VCMD,
       function(msg) {
         console.log(msg);
       }
@@ -91,10 +96,15 @@ let videoClass = (function() {
   };
 
   let pauseVideo = () => {
+    let VCMD = {
+      cmd: "pause", 
+      vts: player.getCurrentTime(), 
+      vidID: nowPlaying
+    }
     player.pauseVideo();
     socket.emit(
       "playerControl",
-      { cmd: "pause", meta: player.getCurrentTime(), vid: nowPlaying },
+      VCMD,
       function(msg) {
         console.log(msg);
       }
@@ -103,8 +113,6 @@ let videoClass = (function() {
 
   let loadVideo = argID => {
     console.log("load video", argID);
-    let meta = {};
-
     let id = "";
     if (argID) {
       id = argID;
@@ -131,15 +139,20 @@ let videoClass = (function() {
         document.getElementById("videoLoadError").textContent = "";
         player.pauseVideo();
         player.loadVideoById(id);
-        meta.newURL = id;
 
-        socket.emit("playerControl", { cmd: "load", meta: meta }, function(
+        nowPlaying = id;
+
+        let VCMD = {
+          cmd: "play", 
+          vts: player.getCurrentTime(), 
+          vidID: nowPlaying
+        }
+        socket.emit("playerControl", VCMD, function(
           msg
         ) {
           console.log(msg);
         });
 
-        nowPlaying = newURL;
 
         try {
           document.getElementById("nowPlayingTitle").textContent =
@@ -151,27 +164,34 @@ let videoClass = (function() {
   };
 
   let receiveCMD = msg => {
+    // let msg = {
+    //   cmd: "pause", 
+    //   vts: player.getCurrentTime(), 
+    //   vidID: nowPlaying
+    // }
+
+    console.log("new cmd received ",msg)
     if (msg.cmd == "play") {
-      if (nowPlaying != msg.vid) {
-        loadVideo(msg.meta.vid);
+      if (nowPlaying != msg.vidID) {
+        loadVideo(msg.vidID);
         setTimeout(() => {
           player.playVideo();
-          player.seekTo(msg.meta);
+          player.seekTo(msg.vts);
         }, 1000);
       } else {
         player.playVideo();
         player.seekTo(msg.meta);
       }
     } else if (msg.cmd == "pause") {
-      if (nowPlaying != msg.vid) {
-        loadVideo(msg.meta.vid);
+      if (nowPlaying != msg.vidID) {
+        loadVideo(msg.vidID);
         setTimeout(() => {
           player.pauseVideo();
-          player.seekTo(msg.meta);
+          player.seekTo(msg.vts);
         }, 1000);
       } else {
         player.pauseVideo();
-        player.seekTo(msg.meta);
+        player.seekTo(msg.vts);
       }
     } else if (msg.cmd == "load") {
       player.loadVideoById(msg.meta.newURL);

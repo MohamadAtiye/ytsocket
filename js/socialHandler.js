@@ -171,6 +171,10 @@ let socialClass = (function () {
 
           console.log(myProfile);
           createChatInterface();
+
+          if(msg.roomMeta){
+            videoClass.receiveCMD(msg.roomMeta);
+          }
         } else {
           roombox.style.borderColor = "red";
           tr_room_3.firstChild.innerHTML = msg.error;

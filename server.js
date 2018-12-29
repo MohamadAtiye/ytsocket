@@ -20,9 +20,10 @@ const io = socketIO(server);
 
 let connectedPlayerSockets = [];
 let connectedPlayerNames = [];
+let roomsMetaData = [];
 
 io.on("connection", function (socket) {
-  console.log("###################-- "+socket.id, " connected");
+  console.log("###################-- " + socket.id, " connected");
   connectedPlayerSockets[socket.id] = socket;
 
   // //joining a room
@@ -45,10 +46,13 @@ io.on("connection", function (socket) {
   socket.on("playerControl", function (msg, callback) {
     console.log(socket.id, " said : " + JSON.stringify(msg));
     if (socket.profile && socket.profile.room)
-      socket
+      {socket
         .to(socket.profile.room)
         .emit("playerControl", msg);
 
+        roomsMetaData[socket.profile.room] = JSON.parse(JSON.stringify(msg));
+        console.log(roomsMetaData[socket.profile.room] );
+      }
   });
 
   ////////////////////////////////////////////////////////////////////////////////////////
@@ -69,7 +73,7 @@ io.on("connection", function (socket) {
       callback({ ok: true, error: "", newName: newName, id: socket.id });
 
       console.log("###################-- new received a name");
-      console.log(socket.id,socket.profile);
+      console.log(socket.id, socket.profile);
     }
   });
 
@@ -88,18 +92,29 @@ io.on("connection", function (socket) {
         error: "**choose room name between 5 and 30 characters"
       });
     } else {
+      let roomExist = false;
+      let roomMeta = {};
+      if(roomsMetaData[newRoom]) {
+        roomExist=true;
+        roomMeta = roomsMetaData[newRoom];
+      }
+
       socket.join(newRoom, () => {
         socket.profile.room = newRoom;
         let newMsg = { ts: Date.now(), from: "system", msg: socket.profile.name + " has joined this room", color: "red" };
         socket
           .to(newRoom)
           .emit("roomChat", newMsg);
+
+        
+
+        callback({ ok: true, error: "", newName: socket.profile.name, newRoom: newRoom, id: socket.id,roomMeta:roomMeta });
+        console.log("###################-- player joined a room");
+        console.log(socket.id, socket.profile);
       });
 
-      callback({ ok: true, error: "", newName: socket.profile.name, newRoom: newRoom, id: socket.id });
 
-      console.log("###################-- player joined a room");
-      console.log(socket.id,socket.profile);
+
     }
   });
 
@@ -112,13 +127,22 @@ io.on("connection", function (socket) {
 
     callback(msg);
 
-    console.log("###################-- message to room : "+ socket.profile.room);
+    console.log("###################-- message to room : " + socket.profile.room);
     console.log(msg);
   });
 
-  socket.on("ping", function (msg, callback) {
-    console.log("###################-- ping message");
-    callback(msg);
+  socket.on("pinger", function (msg, callback) {
+    let isIn = false;
+    let name = "";
+    let room = "";
+    if (socket.profile) {
+      name = socket.profile.name;
+      room = socket.profile.room;
+      isIn = true;
+    }
+    else { }
+
+    callback({ isCon: true, isIn: isIn, meta: { name: name, room: room } });
   });
 
   ////////////////////////////////////////////////////////////////////////////////////////
@@ -129,7 +153,7 @@ io.on("connection", function (socket) {
       name = socket.profile.name;
       room = socket.profile.room;
     }
-    console.log("###################-- "+socket.id, name, " disconnected ");
+    console.log("###################-- " + socket.id, name, " disconnected ");
 
     //-- remove name from used names list
     var index = connectedPlayerNames.indexOf(name);
