@@ -31,7 +31,7 @@ function onPlayerReady(event) {
   try {
     document.getElementById("nowPlayingTitle").textContent =
       player.j.videoData.title;
-  } catch (e) {}
+  } catch (e) { }
 }
 
 // 5. The API calls this function when the player's state changes.
@@ -76,20 +76,20 @@ function stopVideo() {
 // https://www.youtube.com/results?search_query=keyword2&pbj=1
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-let videoClass = (function() {
+let videoClass = (function () {
   let nowPlaying = INIT_VID_ID;
 
   let playVideo = () => {
     let VCMD = {
-      cmd: "play", 
-      vts: player.getCurrentTime(), 
+      cmd: "play",
+      vts: player.getCurrentTime(),
       vidID: nowPlaying
     }
     player.playVideo();
     socket.emit(
       "playerControl",
       VCMD,
-      function(msg) {
+      function (msg) {
         console.log(msg);
       }
     );
@@ -97,21 +97,21 @@ let videoClass = (function() {
 
   let pauseVideo = () => {
     let VCMD = {
-      cmd: "pause", 
-      vts: player.getCurrentTime(), 
+      cmd: "pause",
+      vts: player.getCurrentTime(),
       vidID: nowPlaying
     }
     player.pauseVideo();
     socket.emit(
       "playerControl",
       VCMD,
-      function(msg) {
+      function (msg) {
         console.log(msg);
       }
     );
   };
 
-  let loadVideo = argID => {
+  let loadVideo = (argID, isCmd) => {
     console.log("load video", argID);
     let id = "";
     if (argID) {
@@ -142,22 +142,23 @@ let videoClass = (function() {
 
         nowPlaying = id;
 
-        let VCMD = {
-          cmd: "play", 
-          vts: player.getCurrentTime(), 
-          vidID: nowPlaying
+        if (!isCmd) {
+          let VCMD = {
+            cmd: "play",
+            vts: player.getCurrentTime(),
+            vidID: nowPlaying
+          }
+          socket.emit("playerControl", VCMD, function (
+            msg
+          ) {
+            console.log(msg);
+          });
         }
-        socket.emit("playerControl", VCMD, function(
-          msg
-        ) {
-          console.log(msg);
-        });
-
 
         try {
           document.getElementById("nowPlayingTitle").textContent =
             player.j.videoData.title;
-        } catch (e) {}
+        } catch (e) { }
       }
       console.log(nowPlayingThumbnail.src);
     };
@@ -170,10 +171,10 @@ let videoClass = (function() {
     //   vidID: nowPlaying
     // }
 
-    console.log("new cmd received ",msg)
+    console.log("new cmd received ", msg)
     if (msg.cmd == "play") {
       if (nowPlaying != msg.vidID) {
-        loadVideo(msg.vidID);
+        loadVideo(msg.vidID, true);
         setTimeout(() => {
           player.playVideo();
           player.seekTo(msg.vts);
@@ -184,7 +185,7 @@ let videoClass = (function() {
       }
     } else if (msg.cmd == "pause") {
       if (nowPlaying != msg.vidID) {
-        loadVideo(msg.vidID);
+        loadVideo(msg.vidID, true);
         setTimeout(() => {
           player.pauseVideo();
           player.seekTo(msg.vts);
@@ -215,7 +216,7 @@ let videoClass = (function() {
     var xmlhttp = new XMLHttpRequest();
     var url = "getSearch.php?q=" + searchString;
 
-    xmlhttp.onreadystatechange = function() {
+    xmlhttp.onreadystatechange = function () {
       if (this.readyState == 4 && this.status == 200) {
         try {
           var myArr = JSON.parse(this.responseText);

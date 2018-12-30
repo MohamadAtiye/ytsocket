@@ -100,6 +100,8 @@ io.on("connection", function (socket) {
       }
 
       socket.join(newRoom, () => {
+
+
         socket.profile.room = newRoom;
         let newMsg = { ts: Date.now(), from: "system", msg: socket.profile.name + " has joined this room", color: "red" };
         socket
@@ -168,6 +170,22 @@ io.on("connection", function (socket) {
 
     //-- delete player socket
     delete connectedPlayerSockets[socket.id];
+
+
+    //get all active rooms and remove any meta data of empty room
+    var room_list =[];
+    for (var oneRoom in io.sockets.adapter.rooms){
+      room_list.push(oneRoom);
+    }
+    let room_keys = Object.keys(roomsMetaData);
+
+    for (let index = 0; index < room_keys.length; index++) {
+      if(room_list.indexOf(room_keys[index]) <0){
+        delete roomsMetaData[room_keys[index]];
+      }
+    }
+    console.log("###################-- All rooms (after disconnect) " + room_list);
+    console.log("###################-- All rooms METADATA (after disconnect) " + roomsMetaData);
   });
 
   ////////////////////////////////////////////////////////////////////////////////////////
