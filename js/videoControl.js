@@ -17,6 +17,8 @@ let videoClass = (function () {
   let timeBarH = 20;
   let timeBarW = 200;
 
+  let nowPlayingTitle,videoControlsDiv;
+
   let seeking = false;
   let seekX = 0;
   let init = () => {
@@ -42,6 +44,10 @@ let videoClass = (function () {
     }
 
     myVideoPlayer.controls = false;
+
+    nowPlayingTitle = document.getElementById("nowPlayingTitle");
+    videoControlsDiv = document.getElementById("videoControlsDiv");
+
 
 
     currentVideoTime = document.getElementById("currentVideoTime");
@@ -122,6 +128,15 @@ let videoClass = (function () {
     videoTimeContext.rect(0, 0, percent, timeBarH);
     videoTimeContext.fill();
 
+    letVideoState = myVideoPlayer.readyState;
+    nowPlayingTitle.textContent = letVideoState;
+    if(letVideoState!=4){
+      videoControlsDiv.style.display = "none";
+    }
+    else{
+      videoControlsDiv.style.display = "block";
+    }
+
     requestAnimationFrame(updateTimeLine);
   }
 
@@ -164,58 +179,58 @@ let videoClass = (function () {
     console.log("sent pauseVideo msg", VCMD);
   };
 
-  let loadVideo = (argID, isCmd) => {
-    console.log("load video", argID);
-    let id = "";
-    if (argID) {
-      id = argID;
-    } else {
-      let newURL = document.getElementById("videoIDBox").value;
-      try {
-        var url = new URL(newURL);
-        id = url.searchParams.get("v");
-      } catch (e) {
-        id = newURL;
-      }
-    }
-    let nowPlayingThumbnail = document.getElementById("nowPlayingThumbnail");
-    nowPlayingThumbnail.src =
-      "https://img.youtube.com/vi/" + id + "/mqdefault.jpg";
-    nowPlayingThumbnail.onload = e => {
-      console.log("loaded", e);
-      if (nowPlayingThumbnail.width === 120) {
-        document.getElementById("videoLoadError").textContent =
-          "Video not found";
-        alert("Error: Invalid video id ", thumnowPlayingThumbnailber.src);
-      } else {
-        console.log("loading video ", nowPlayingThumbnail.src);
-        document.getElementById("videoLoadError").textContent = "";
-        player.pauseVideo();
-        player.loadVideoById(id);
+  // let loadVideo = (argID, isCmd) => {
+  //   console.log("load video", argID);
+  //   let id = "";
+  //   if (argID) {
+  //     id = argID;
+  //   } else {
+  //     let newURL = document.getElementById("videoIDBox").value;
+  //     try {
+  //       var url = new URL(newURL);
+  //       id = url.searchParams.get("v");
+  //     } catch (e) {
+  //       id = newURL;
+  //     }
+  //   }
+  //   let nowPlayingThumbnail = document.getElementById("nowPlayingThumbnail");
+  //   nowPlayingThumbnail.src =
+  //     "https://img.youtube.com/vi/" + id + "/mqdefault.jpg";
+  //   nowPlayingThumbnail.onload = e => {
+  //     console.log("loaded", e);
+  //     if (nowPlayingThumbnail.width === 120) {
+  //       document.getElementById("videoLoadError").textContent =
+  //         "Video not found";
+  //       alert("Error: Invalid video id ", thumnowPlayingThumbnailber.src);
+  //     } else {
+  //       console.log("loading video ", nowPlayingThumbnail.src);
+  //       document.getElementById("videoLoadError").textContent = "";
+  //       player.pauseVideo();
+  //       player.loadVideoById(id);
 
-        nowPlaying = id;
+  //       nowPlaying = id;
 
-        if (!isCmd) {
-          let VCMD = {
-            cmd: "play",
-            vts: player.getCurrentTime(),
-            vidID: nowPlaying
-          }
-          socket.emit("playerControl", VCMD, function (
-            msg
-          ) {
-            console.log(msg);
-          });
-        }
+  //       if (!isCmd) {
+  //         let VCMD = {
+  //           cmd: "play",
+  //           vts: player.getCurrentTime(),
+  //           vidID: nowPlaying
+  //         }
+  //         socket.emit("playerControl", VCMD, function (
+  //           msg
+  //         ) {
+  //           console.log(msg);
+  //         });
+  //       }
 
-        try {
-          document.getElementById("nowPlayingTitle").textContent =
-            player.j.videoData.title;
-        } catch (e) { }
-      }
-      console.log(nowPlayingThumbnail.src);
-    };
-  };
+  //       try {
+  //         document.getElementById("nowPlayingTitle").textContent =
+  //           player.j.videoData.title;
+  //       } catch (e) { }
+  //     }
+  //     console.log(nowPlayingThumbnail.src);
+  //   };
+  // };
 
   let receiveCMD = msg => {
     // let msg = {
@@ -228,12 +243,12 @@ let videoClass = (function () {
 
     if (msg.cmd == "play") {
       if (nowPlaying != msg.vidID) {
-        loadVideo(msg.vidID, true);
-        setTimeout(() => {
-          myVideoPlayer.play();
-          myVideoPlayer.volume = 1;
-          myVideoPlayer.currentTime = msg.vts;
-        }, 1000);
+        // loadVideo(msg.vidID, true);
+        // setTimeout(() => {
+        //   myVideoPlayer.play();
+        //   myVideoPlayer.volume = 1;
+        //   myVideoPlayer.currentTime = msg.vts;
+        // }, 1000);
       } else {
         myVideoPlayer.play();
         myVideoPlayer.volume = 1;
@@ -241,11 +256,11 @@ let videoClass = (function () {
       }
     } else if (msg.cmd == "pause") {
       if (nowPlaying != msg.vidID) {
-        loadVideo(msg.vidID, true);
-        setTimeout(() => {
-          myVideoPlayer.pause();
-          myVideoPlayer.currentTime = msg.vts;
-        }, 1000);
+        // loadVideo(msg.vidID, true);
+        // setTimeout(() => {
+        //   myVideoPlayer.pause();
+        //   myVideoPlayer.currentTime = msg.vts;
+        // }, 1000);
       } else {
         myVideoPlayer.pause();
         myVideoPlayer.currentTime = msg.vts;
@@ -261,7 +276,7 @@ let videoClass = (function () {
     playVideo: playVideo,
     pauseVideo: pauseVideo,
 
-    loadVideo: loadVideo,
+    // loadVideo: loadVideo,
 
     receiveCMD: receiveCMD
   };
