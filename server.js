@@ -22,42 +22,7 @@ io.on("connection", function(socket) {
   console.log("###################-- " + socket.id, " connected");
   connectedPlayerSockets[socket.id] = socket;
 
-  //forward to everyone
-  socket.on("event1", function(msg, callback) {
-    socket.broadcast.emit("event1", msg);
-    console.log("event1 , " + msg);
-    if (callback) callback({ ok: true });
-  });
-  //forward to everyone
-  socket.on("event2", function(msg, callback) {
-    socket.broadcast.emit("event2", msg);
-    console.log("event2 , " + msg);
-    if (callback) callback({ ok: true });
-  });
-  //forward to everyone
-  socket.on("event3", function(msg, callback) {
-    socket.broadcast.emit("event3", msg);
-    console.log("event3 , " + msg);
-    if (callback) callback({ ok: true });
-  });
-  //forward to everyone
-  socket.on("event4", function(msg, callback) {
-    socket.broadcast.emit("event4", msg);
-    console.log("event4 , " + msg);
-    if (callback) callback({ ok: true });
-  });
-  //forward to everyone
-  socket.on("event5", function(msg, callback) {
-    socket.broadcast.emit("event5", msg);
-    console.log("event5 , " + msg);
-    if (callback) callback({ ok: true });
-  });
-  //forward to self
-  socket.on("eventPing", function(msg, callback) {
-    io.to(socket.id).emit("eventPing", msg);
-    console.log("eventPing , " + msg);
-    if (callback) callback({ ok: true });
-  });
+
 
   // io.emit //==> to everyone including sender
   // socket.broadcast.emit //==> to everyone except sender

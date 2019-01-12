@@ -3,6 +3,8 @@ var socket = io("http://localhost:3000");
 
 document.addEventListener("DOMContentLoaded", () => {
 
+
+  //-- pinger to keep alive
   setInterval(() => {
     let waiter = true;
     socket.emit("pinger",  { data: "this is a test" }, function(msg) {

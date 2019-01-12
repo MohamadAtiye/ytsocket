@@ -1,91 +1,140 @@
-const INIT_VID_ID = "4p_YY0R8Si0";
 
-
-// 2. This code loads the IFrame Player API code asynchronously.
-var tag = document.createElement("script");
-tag.src = "https://www.youtube.com/iframe_api";
-var firstScriptTag = document.getElementsByTagName("script")[0];
-firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-
-// 3. This function creates an <iframe> (and YouTube player)
-//    after the API code downloads.
-var player;
-function onYouTubeIframeAPIReady() {
-  console.log("loadInitVideo");
-
-  player = new YT.Player("player", {
-    // height: "390",
-    // width: "640",
-    width: "100%",
-    videoId: INIT_VID_ID,
-    events: {
-      onReady: onPlayerReady,
-      onStateChange: onPlayerStateChange
-    }
-  });
-}
-
-// 4. The API will call this function when the video player is ready.
-function onPlayerReady(event) {
-  event.target.playVideo();
-  try {
-    document.getElementById("nowPlayingTitle").textContent =
-      player.j.videoData.title;
-  } catch (e) { }
-}
-
-// 5. The API calls this function when the player's state changes.
-//    The function indicates that when playing a video (state=1),
-//    the player should play for six seconds and then stop.
-var done = false;
-var videoState = -1;
-function onPlayerStateChange(event) {
-  console.log("onPlayerStateChange", event);
-  //   BUFFERING: 3
-  //   CUED: 5
-  //   ENDED: 0
-  //   PAUSED: 2
-  //   PLAYING: 1
-  //   UNSTARTED: -1
-
-  if (event.data == YT.PlayerState.PLAYING) {
-    if (videoState == YT.PlayerState.PAUSED) videoClass.playVideo();
-    videoState = event.data;
-  } else if (event.data == YT.PlayerState.PAUSED) {
-    videoClass.pauseVideo();
-    videoState = event.data;
-  } else if (event.data == YT.PlayerState.ENDED) {
-    // videoClass.pauseVideo();
-    videoState = event.data;
-  } else if (event.data == YT.PlayerState.BUFFERING) {
-    // videoClass.pauseVideo();
-    videoState = event.data;
-  } else if (event.data == YT.PlayerState.UNSTARTED) {
-    // videoClass.pauseVideo();
-    videoState = event.data;
-  } else if (event.data == YT.PlayerState.PLAYING && !done) {
-    setTimeout(stopVideo, 6000);
-    done = true;
-    videoState = event.data;
-  }
-}
-function stopVideo() {
-  player.stopVideo();
-}
-
-// https://www.youtube.com/results?search_query=keyword2&pbj=1
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 let videoClass = (function () {
-  let nowPlaying = INIT_VID_ID;
+
+  document.addEventListener("DOMContentLoaded", () => {
+    init();
+  });
+
+
+
+  let nowPlaying = "myVideo";
+
+
+  let myVideoPlayer, playVideoBtn, pauseVideoBtn;
+  let currentVideoTime, fullVideoTime, videoTimeCanvas, videoTimeContext;
+  let timeBarH = 20;
+  let timeBarW = 200;
+
+  let seeking = false;
+  let seekX = 0;
+  let init = () => {
+    myVideoPlayer = document.getElementById("myVideoPlayer");
+
+    playVideoBtn = document.getElementById("playVideoBtn");
+    playVideoBtn.onclick = (e) => {
+      playVideo();
+    }
+    pauseVideoBtn = document.getElementById("pauseVideoBtn");
+    pauseVideoBtn.onclick = (e) => {
+      pauseVideo();
+    }
+
+    let goBack10Btn = document.getElementById("goBack10Btn");
+    goBack10Btn.onclick = ()=>{
+      myVideoPlayer.currentTime -=10;
+    }
+
+    let goFront10Btn = document.getElementById("goFront10Btn");
+    goFront10Btn.onclick = ()=>{
+      myVideoPlayer.currentTime +=10;
+    }
+
+    myVideoPlayer.controls = false;
+
+
+    currentVideoTime = document.getElementById("currentVideoTime");
+    fullVideoTime = document.getElementById("fullVideoTime");
+    videoTimeCanvas = document.getElementById("videoTimeCanvas");
+    videoTimeCanvas.onmousedown = (event) => {
+      event.preventDefault();
+      seeking = true;
+      seekX =
+        // (event.layerX * videoTimeCanvas.width) / videoTimeCanvas.offsetWidth;
+        event.offsetX  / videoTimeCanvas.offsetWidth;
+      let res = seekX * myVideoPlayer.duration.toFixed(1);
+      myVideoPlayer.currentTime = res;
+      sendSeekCMD();
+    }
+    // videoTimeCanvas.onmousemove = (event) => {
+    //   event.preventDefault();
+    //   if (seeking) {
+    //     seekX =
+    //       // (event.layerX * videoTimeCanvas.width) / videoTimeCanvas.offsetWidth;
+    //       (event.offsetX / videoTimeCanvas.offsetWidth);
+    //     // console.log(event,event.offsetX,seekX);
+    //     let res = seekX * myVideoPlayer.duration.toFixed(1);
+    //     myVideoPlayer.currentTime = res;
+    //     sendSeekCMD();
+    //   }
+    // }
+    // videoTimeCanvas.onmouseleave = (e)=>{
+
+    // }
+    document.onmouseup = (e) => {
+      seeking = false;
+    }
+    videoTimeCanvas.height = timeBarH;
+    videoTimeCanvas.width = timeBarW;
+    videoTimeContext = videoTimeCanvas.getContext("2d");
+
+    updateTimeLine();
+
+    // myVideoPlayer.addEventListener("seeked", function() { 
+    // }, true);
+
+  }
+
+
+  let lastAttepmt = 0;
+  let sendSeekCMD = (res) => {
+    let now = Date.now();
+    if (now - lastAttepmt < 333) {
+      setTimeout(() => {
+      }, 222);
+      return;
+    }
+
+    lastAttepmt=now;
+
+    playVideo();
+  }
+  
+  let updateTimeLine = () => {
+
+    let now = myVideoPlayer.currentTime.toFixed(1);
+    let all = myVideoPlayer.duration.toFixed(1);
+
+    currentVideoTime.textContent = now;
+    fullVideoTime.textContent = all;
+
+
+    videoTimeContext.beginPath();
+    videoTimeContext.fillStyle = "green";
+    videoTimeContext.rect(0, 0, timeBarW, timeBarH);
+    videoTimeContext.fill();
+
+    let percent = (now / all) * timeBarW;
+
+    videoTimeContext.beginPath();
+    videoTimeContext.fillStyle = "red";
+    videoTimeContext.rect(0, 0, percent, timeBarH);
+    videoTimeContext.fill();
+
+    requestAnimationFrame(updateTimeLine);
+  }
+
 
   let playVideo = () => {
+    myVideoPlayer.play();
+    myVideoPlayer.volume = 1;
+    myVideoPlayer.controls = false;
     let VCMD = {
       cmd: "play",
-      vts: player.getCurrentTime(),
+      vts: myVideoPlayer.currentTime,
       vidID: nowPlaying
     }
-    player.playVideo();
     socket.emit(
       "playerControl",
       VCMD,
@@ -93,15 +142,18 @@ let videoClass = (function () {
         console.log(msg);
       }
     );
+    console.log("sent playVideo msg", VCMD);
   };
 
   let pauseVideo = () => {
+    myVideoPlayer.pause();
+    myVideoPlayer.volume = 1;
+    myVideoPlayer.controls = false;
     let VCMD = {
       cmd: "pause",
-      vts: player.getCurrentTime(),
+      vts: myVideoPlayer.currentTime,
       vidID: nowPlaying
     }
-    player.pauseVideo();
     socket.emit(
       "playerControl",
       VCMD,
@@ -109,6 +161,7 @@ let videoClass = (function () {
         console.log(msg);
       }
     );
+    console.log("sent pauseVideo msg", VCMD);
   };
 
   let loadVideo = (argID, isCmd) => {
@@ -167,32 +220,35 @@ let videoClass = (function () {
   let receiveCMD = msg => {
     // let msg = {
     //   cmd: "pause", 
-    //   vts: player.getCurrentTime(), 
+    //   vts: myVideoPlayer.getCurrentTime(), 
     //   vidID: nowPlaying
     // }
 
     console.log("new cmd received ", msg)
+
     if (msg.cmd == "play") {
       if (nowPlaying != msg.vidID) {
         loadVideo(msg.vidID, true);
         setTimeout(() => {
-          player.playVideo();
-          player.seekTo(msg.vts);
+          myVideoPlayer.play();
+          myVideoPlayer.volume = 1;
+          myVideoPlayer.currentTime = msg.vts;
         }, 1000);
       } else {
-        player.playVideo();
-        player.seekTo(msg.meta);
+        myVideoPlayer.play();
+        myVideoPlayer.volume = 1;
+        myVideoPlayer.currentTime = msg.vts;
       }
     } else if (msg.cmd == "pause") {
       if (nowPlaying != msg.vidID) {
         loadVideo(msg.vidID, true);
         setTimeout(() => {
-          player.pauseVideo();
-          player.seekTo(msg.vts);
+          myVideoPlayer.pause();
+          myVideoPlayer.currentTime = msg.vts;
         }, 1000);
       } else {
-        player.pauseVideo();
-        player.seekTo(msg.vts);
+        myVideoPlayer.pause();
+        myVideoPlayer.currentTime = msg.vts;
       }
     } else if (msg.cmd == "load") {
       player.loadVideoById(msg.meta.newURL);
@@ -200,101 +256,13 @@ let videoClass = (function () {
     console.log(msg);
   };
 
-  let searchVideo = args => {
-    if (args == -1) {
-      let searchDiv = document.getElementById("searchArea");
-      searchDiv.innerHTML = "";
-      document.getElementById("searchBox").value = "";
-    }
 
-    let searchString = document.getElementById("searchBox").value;
-    if (searchString.length < 1) {
-      console.log("no search string");
-      return;
-    }
-
-    var xmlhttp = new XMLHttpRequest();
-    var url = "getSearch.php?q=" + searchString;
-
-    xmlhttp.onreadystatechange = function () {
-      if (this.readyState == 4 && this.status == 200) {
-        try {
-          var myArr = JSON.parse(this.responseText);
-          displaySearchResults(myArr);
-        } catch (e) {
-          console.log(e);
-          displaySearchResults({ hits: 0, video: [] });
-        }
-      }
-    };
-    xmlhttp.open("GET", url, true);
-    xmlhttp.send();
-  };
-
-  let displaySearchResults = json => {
-    console.log(json);
-
-    let searchDiv = document.getElementById("searchArea");
-    searchDiv.innerHTML = "";
-
-    if (json.hits == 0 || json.video.length == 0) {
-      searchDiv.innerHTML = "error occured or no results found";
-    } else {
-      for (let index = 0; index < json.video.length; index++) {
-        let oneRes = document.createElement("div");
-        oneRes.style.border = "1px solid black";
-        oneRes.style.width = "100%";
-        oneRes.style.height = "150px";
-        oneRes.style.margin = "10px";
-        oneRes.style.display = "flex";
-
-        let id = json.video[index].encrypted_id;
-        oneRes.value = id;
-        oneRes.onclick = () => {
-          loadVideo(id);
-        };
-
-        let thumb = document.createElement("img");
-        thumb.style.flex = "1";
-        thumb.src = json.video[index].thumbnail;
-        oneRes.appendChild(thumb);
-
-        let meta = document.createElement("div");
-        meta.style.height = "100%";
-        meta.style.flex = "2";
-        meta.style.padding = "5px";
-
-        let title = document.createElement("h4");
-        title.style.margin = "10px 0";
-        title.textContent = json.video[index].title;
-        meta.appendChild(title);
-
-        let info = document.createElement("label");
-        info.textContent =
-          json.video[index].author +
-          ", " +
-          json.video[index].views +
-          " view, " +
-          json.video[index].added;
-        meta.appendChild(info);
-
-        let desc = document.createElement("p");
-        desc.textContent = json.video[index].description;
-        meta.appendChild(desc);
-
-        oneRes.appendChild(meta);
-
-        searchDiv.appendChild(oneRes);
-      }
-    }
-  };
   return {
     playVideo: playVideo,
     pauseVideo: pauseVideo,
 
     loadVideo: loadVideo,
 
-    receiveCMD: receiveCMD,
-    searchVideo: searchVideo
+    receiveCMD: receiveCMD
   };
 })();
